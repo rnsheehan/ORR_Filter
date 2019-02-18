@@ -61,6 +61,7 @@ static const std::string dottxt = ".txt";
 #include "Vector_Utils.h"
 #include "Neville.h"
 #include "Material_Models.h"
+#include "Ring_Resonator.h"
 #include "Testing.h"
 
 #endif
