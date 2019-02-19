@@ -37,3 +37,28 @@ void testing::material_values()
 	std::cout <<"Refractive index of InGaAs: " << smpl3.refractive_index(infrac) << "\n";
 	std::cout<<"Refractive index of InGaAs: " << mat2->refractive_index(infrac) << "\n"; // this should return the RI of InGaAs
 }
+
+void testing::orr_values()
+{
+	// test calculation for the ORR shown in Okamoto
+	// R. Sheehan 19 - 2 - 2018
+
+	double neff = 1.5; 
+	double ng = neff; 
+	double lambda = 1.5; 
+	double gamma = 2.3E-7; 
+	double rho = gamma; 
+	double kappa = 1.31E-5; 
+	double Lcoup = 1000; 
+	double bendR = 3000; 
+
+	ORR device; 
+
+	device.set_params(lambda, neff, ng, kappa, gamma, rho, bendR, Lcoup); 
+
+	device.report(); 
+
+	double start = 0.5, end = 3.0, increment = 0.01; 
+	std::string filename = "Spectrum_Scan_Values.txt"; 
+	device.spctrm_scan(start, end, increment, filename); 
+}

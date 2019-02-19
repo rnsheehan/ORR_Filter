@@ -62,7 +62,7 @@ void ORR::set_params(double wavelength, double eff_indx, double group_indx, doub
 			eff_OPL = neff * L; // optical path length based on effective index 
 			grp_OPL = ng * L; // optical path length based on group index
 
-			nu_FSR = 300.0 / grp_OPL; // frequency FSR assuming c = 300 um.THz
+			nu_FSR = (300.0 / grp_OPL); // frequency FSR assuming c = 300 um.THz
 			wl_FSR = template_funcs::DSQR(lambda) / grp_OPL; // wavelength FSR units of um
 
 			X = sqrt(gamma_conj)*exp(-0.5*rho*L); 
@@ -97,6 +97,7 @@ void ORR::set_params(double wavelength, double eff_indx, double group_indx, doub
 			if (!c5) reason += "ring_rad: " + template_funcs::toString(ring_rad, 2) + " is not correct\n";
 			if (!c6) reason += "ring_coup_len: " + template_funcs::toString(ring_coup_len, 2) + " is not correct\n";
 			if (!c7) reason += "group_indx: " + template_funcs::toString(group_indx, 2) + " is not correct\n";
+			if (!c8) reason += "wavelength: " + template_funcs::toString(wavelength, 2) + " is not correct\n";
 			throw std::invalid_argument(reason); 
 		}
 	}
@@ -106,12 +107,60 @@ void ORR::set_params(double wavelength, double eff_indx, double group_indx, doub
 	}
 }
 
-double ORR::T(double wavelength)
+void ORR::report()
 {
-	// Compute the value of the intensity transmission spectrum at a wavelength
+	// Report on the computed parameters for the ORR device
+	// R. Sheehan 19 - 2 - 2018
 
 	try {
 		if (params_defined) {
+			std::cout << "Optical Ring Resonator Parameters\n\n";
+			std::cout << "Reference wavelength: " << lambda << " um\n"; 
+			std::cout << "Waveguide effective index: " << neff << "\n"; 
+			std::cout << "Waveguide group index: " << ng << "\n\n"; 
+			
+			std::cout << "Insertion loss: "<<gamma<<" dB / um\n";
+			std::cout << "Bend loss: " << rho << " dB / um\n";
+			std::cout << "Coupling coefficient: " << kappa << " dB/um\n\n"; 
+
+			std::cout << "Ring radius: " << R << " um\n";
+			std::cout << "Coupler length: " << Lcoup << " um\n";
+			std::cout << "Total ring length: " << L << " um\n"; 
+			std::cout << "Effective optical path length: " << eff_OPL << " um\n"; 
+			std::cout << "Group optical path length: " << grp_OPL << " um\n";
+			std::cout << "kappa L: " << kappa * L << "\n\n"; 
+
+			std::cout << "Attenuation term X: " << X << "\n"; 
+			std::cout << "Coupling term Y: " << Y << "\n\n";
+
+			std::cout << "Tmax: " << Tmax << "\n"; 
+			std::cout << "Tmin: " << Tmin << "\n"; 
+			std::cout << "Finesse: " << F << "\n"; 
+			std::cout << "Frequency FSR: " << 1000.0*nu_FSR << " GHz\n"; 
+			std::cout << "Frequency FWHM: " << 1.0e+6*nu_FWHM << " MHz\n"; 
+			std::cout << "Wavelength FSR: " << 1000.0*wl_FSR << " nm\n"; 
+			std::cout << "Wavelength FWHM: " << 1.0e+6*wl_FWHM << " pm\n\n"; 
+		}
+		else {
+			std::string reason;
+			reason = "Error: void ORR::report()\n";
+			throw std::invalid_argument(reason);
+		}
+	}
+	catch (std::invalid_argument &e) {
+		useful_funcs::exit_failure_output(e.what());
+		exit(EXIT_FAILURE);
+	}
+}
+
+double ORR::through_spctrm(double wavelength)
+{
+	// Compute the value of the intensity transmission spectrum at a wavelength
+	// In the transmission spectrum phi is the only term that is not constant
+	// Code must be made to depend on wavelength dependent effective index data
+
+	try {
+		if (params_defined && wavelength > 0.0) {
 
 			double phase = (PI * eff_OPL) / wavelength; // actually \phi / 2 
 			double denom = XY_conj + 4.0 * XY * template_funcs::DSQR(phase); 
@@ -123,14 +172,14 @@ double ORR::T(double wavelength)
 			else {
 				return 0.0; 
 				std::string reason;
-				reason = "Error: double ORR::T(double wavelength)\n";
+				reason = "Error: double ORR::through_spctrm(double wavelength)\n";
 				reason += "Attempt to divide by zero\n";
 				throw std::runtime_error(reason);
 			}
 		}
 		else {
 			std::string reason; 
-			reason = "Error: double ORR::T(double wavelength)\n"; 
+			reason = "Error: double ORR::through_scptrm(double wavelength)\n"; 
 			reason += "Parameters not defined\n";
 			throw std::invalid_argument(reason); 
 		}
@@ -141,5 +190,82 @@ double ORR::T(double wavelength)
 	}
 	catch (std::runtime_error &e) {
 		std::cerr << e.what(); 
+	}
+}
+
+double ORR::drop_scptrm(double wavelength)
+{
+	// Compute the value of the intensity reflection spectrum at a wavelength
+
+	try {
+		if (params_defined && wavelength > 0.0) {
+			return 1.0 - through_spctrm(wavelength);
+		}
+		else {
+			return 0.0; 
+			std::string reason;
+			reason = "Error: double ORR::drop_scptrm(double wavelength)\n";
+			reason += "Parameters not defined\n";
+			throw std::invalid_argument(reason);
+		}
+	}
+	catch (std::invalid_argument &e) {
+		useful_funcs::exit_failure_output(e.what());
+		exit(EXIT_FAILURE);
+	}
+}
+
+void ORR::spctrm_scan(double start, double end, double increment, std::string filename)
+{
+	// scan the spectrum from start to finish in steps of increment
+	// R. Sheehan 19 - 2 - 2019
+
+	try {
+		bool c1 = start < end ? true : false; 
+		bool c2 = end > 0.0 ? true : false; 
+		bool c3 = increment > 0.0 ? true : false; 
+		bool c4 = abs(end - start) > increment ? true : false; 
+		bool c10 = c1 && c2 && c3 && c4; 
+
+		if (c10) {
+
+			std::ofstream write(filename, std::ios_base::out, std::ios_base::trunc);
+
+			if ( write.is_open() ) {
+				int N_wl, count = 0;
+				double x = start, Tval;
+
+				N_wl = static_cast<int>(1 + ((end - start) / increment));
+
+				// loop over wavelength values
+				for (int i = 0; i < N_wl; i++) {
+
+					Tval = through_spctrm(x); // compute transmission value
+
+					// write the data to a file
+					write << std::setprecision(10) << x << " , " << Tval << " , " << 1.0 - Tval << "\n"; 
+
+					x += increment;
+				}			
+			}
+			else {
+				std::string reason;
+				reason = "Error: void ORR::spctrm_scan(double start, double end, double increment, std::string filename)\n";
+				reason += "Could not open file: " + filename + "\n";
+				throw std::runtime_error(reason);
+			}
+		}
+		else {
+			std::string reason;
+			reason = "Error: void ORR::spctrm_scan(double start, double end, double increment, std::string filename)\n";
+			if (!c1) reason += "start: " + template_funcs::toString(start, 2) + " is not correct\n";
+			if (!c2) reason += "end: " + template_funcs::toString(end, 2) + " is not correct\n";
+			if (!c3 || !c4) reason += "increment: " + template_funcs::toString(increment, 2) + " is not correct\n";
+			throw std::invalid_argument(reason);
+		}
+	}
+	catch (std::invalid_argument &e) {
+		useful_funcs::exit_failure_output(e.what());
+		exit(EXIT_FAILURE);
 	}
 }

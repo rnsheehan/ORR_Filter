@@ -12,8 +12,12 @@ public:
 	ORR(double wavelength, double eff_indx, double group_indx, double coup_coeff, double IL, double BL, double ring_rad, double ring_coup_len);
 
 	void set_params(double wavelength, double eff_indx, double group_indx, double coup_coeff, double IL, double BL, double ring_rad, double ring_coup_len);
+	void report(); 
 
-	double T(double wavelength);
+	double through_spctrm(double wavelength);
+	double drop_scptrm(double wavelength);
+
+	void spctrm_scan(double start, double end, double increment, std::string filename); 
 
 private:
 	bool params_defined; // switch that decides if parameters have been input correctly
@@ -33,7 +37,7 @@ private:
 	double grp_OPL; // group optical path length
 
 	double X; // attenuation term
-	double Y; // coupling strength ter
+	double Y; // coupling strength term
 	double XY; // parameter used in calculation of T
 
 	double X_conj; // parameter used in calculation of T

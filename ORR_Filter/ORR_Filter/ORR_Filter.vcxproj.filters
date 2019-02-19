@@ -18,19 +18,10 @@
     <ClInclude Include="Attach.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Material_Models.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Neville.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Templates.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Useful.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Vector_Utils.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Testing.h">
@@ -39,18 +30,18 @@
     <ClInclude Include="Ring_Resonator.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Material_Models.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Neville.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Vector_Utils.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Material_Models.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Neville.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Useful.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Vector_Utils.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Main.cpp">
@@ -60,6 +51,15 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Ring_Resonator.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Material_Models.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Neville.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Vector_Utils.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
