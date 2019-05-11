@@ -116,19 +116,25 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="Attach.h" />
+    <ClInclude Include="Dispersion_Calc.h" />
+    <ClInclude Include="Eff_Indx_Method.h" />
     <ClInclude Include="Material_Models.h" />
     <ClInclude Include="Neville.h" />
     <ClInclude Include="Ring_Resonator.h" />
+    <ClInclude Include="Slab_WG.h" />
     <ClInclude Include="Templates.h" />
     <ClInclude Include="Testing.h" />
     <ClInclude Include="Useful.h" />
     <ClInclude Include="Vector_Utils.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Dispersion_Calc.cpp" />
+    <ClCompile Include="Eff_Indx_Method.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="Material_Models.cpp" />
     <ClCompile Include="Neville.cpp" />
     <ClCompile Include="Ring_Resonator.cpp" />
+    <ClCompile Include="Slab_WG.cpp" />
     <ClCompile Include="Testing.cpp" />
     <ClCompile Include="Useful.cpp" />
     <ClCompile Include="Vector_Utils.cpp" />

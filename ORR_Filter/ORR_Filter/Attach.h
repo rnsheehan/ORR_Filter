@@ -42,6 +42,12 @@ static const double PI_6 = ((2.0 / 3.0)*p); // pi / 6
 static const double RAD_TO_DEG = (180.0/PI); // factor for converting radian to degrees
 static const double DEG_TO_RAD = (PI / 180.0); // factor for converting radian to degrees
 
+// integer code to determine the particular waveguide object type
+static const int RECT_WG = 5001;
+static const int WIRE_WG = 5002;
+static const int RIB_WG = 5003;
+static const int RIDGE_WG = 5004;
+
 static const double SPEED_OF_LIGHT = (3.0e14); // Speed of light in microns per second
 static const double EPSILON = (8.85e-18); // Permittivity of free space in Farads per micron
 static const double MU = (12.566e-13); // Permeability of free space in Henrys per micron
@@ -61,6 +67,9 @@ static const std::string dottxt = ".txt";
 #include "Vector_Utils.h"
 #include "Neville.h"
 #include "Material_Models.h"
+#include "Slab_WG.h"
+#include "Eff_Indx_Method.h"
+#include "Dispersion_Calc.h"
 #include "Ring_Resonator.h"
 #include "Testing.h"
 

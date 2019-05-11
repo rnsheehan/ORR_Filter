@@ -85,78 +85,157 @@ bool useful_funcs::valid_filename_length(const std::string &name)
 	return static_cast<int>(name.length()) < MAX_PATH_LENGTH ? true : false;
 }
 
-bool useful_funcs::test_gleq(int test, double &x, double &y)
+// Definition of the parameter sweep space class
+// R. Sheehan 1 - 3 - 2019
+
+sweep::sweep()
 {
-	// test x <= y || x >= y
+	// Default Constructor
+	params_defined = false; 
 
-	try{
+	Nsteps = 0; 
 
-		bool t1, t2, t3; 
-		
-		t1 = x == y ? true : false; // strict equality
-		t2 = fabs(x - y) < EPS ? true : false; // equality to within tolerance
+	start = stop = delta = 0.0; 
+}
 
-		if (test == GEQ) {
-			t3 = x > y ? true : false; // x > y
-		}
-		else if (test == LEQ) {
-			t3 = x < y ? true : false; // x < y
+sweep::sweep(int &n_pts, double &start_val, double &stop_val)
+{
+	// Primary Constructor
+
+	set_vals(n_pts, start_val, stop_val); 
+}
+
+sweep::sweep(sweep &swp_obj)
+{
+	// Copy constructor
+	set_vals(swp_obj); 
+}
+
+sweep::~sweep()
+{
+	// Deconstructor
+
+	values.clear(); 
+}
+
+// setter
+void sweep::set_vals(int &n_pts, double &start_val, double &stop_val)
+{
+	// Define parameters for the sweep object
+	// R. Sheehan 1 - 3 - 2019
+
+	// On the differences between the different cast methods in C++
+	// https://stackoverflow.com/questions/332030/when-should-static-cast-dynamic-cast-const-cast-and-reinterpret-cast-be-used
+	// Main message: Use static_cast for ordinary type conversions
+
+	try {
+		bool c1 = n_pts > 3 ? true : false; 
+		bool c2 = fabs(stop_val - start_val) > 0 ? true : false;
+		bool c10 = c1 && c2; 
+
+		if (c10) {
+			// Assign values to the parameters
+			Nsteps = n_pts; 
+			start = std::min(stop_val, start_val); 
+			stop = std::max(stop_val, start_val); 
+			delta = (stop - start) / (static_cast<double>(Nsteps - 1)); 
+
+			// Fill the vector with the desired values
+			values.clear(); 
+
+			double pos = start; 
+			for (int i = 0; i < Nsteps; i++) {
+				values.push_back(pos);
+				pos += delta; 
+			}
+
+			params_defined  = true; 
 		}
 		else {
-			return false; 
-			t3 = false; 
-			std::string reason; 
-			reason = "Error: bool useful_funcs::test_gleq(int &test, double &x, double &y)\n";
-			reason += "Incorrect code input into test\n"; 
-			throw std::runtime_error(reason); 
-		}
+			std::string reason;
+			reason = "Error: void sweep::set_vals(int &n_pts, double &start_val, double &stop_val)\n";
+			if (!c1) reason += "n_pts: " + template_funcs::toString(n_pts) + " is not correct\n";
+			if (!c2) reason += "fabs(stop_val - start_val): " + template_funcs::toString(fabs(stop_val - start_val), 2) + " is not correct\n";
 
-		return t1 || t2 || t3; 
+			throw std::invalid_argument(reason);
+		}
 	}
-	catch (std::runtime_error &e) {
-		std::cerr << e.what(); 
+	catch (std::invalid_argument &e) {
+		useful_funcs::exit_failure_output(e.what());
+		exit(EXIT_FAILURE);
 	}
 }
 
-//void useful_funcs::read_into_vector(std::string &filename, std::vector<double> &data, int &n_pts, bool loud)
-//{
-//	// read data from a file into a vector
-//	// R. Sheehan 11 - 9 - 2017
-//
-//	try{
-//		std::ifstream the_file; 
-//		the_file.open(filename, std::ios_base::in);
-//
-//		if(the_file.is_open()){
-//
-//			if(loud) std::cout<<filename<<" opened for reading\n"; 
-//
-//			double value; 
-//			n_pts = 0;
-//			while(the_file >> value){
-//				data.push_back(value);
-//				n_pts++; 
-//			}
-//
-//			if(loud) std::cout<<template_funcs::toString(n_pts)<<" data were read from "<<filename<<"\n"; 
-//
-//			the_file.close(); 		
-//		}
-//		else{
-//			std::string reason; 
-//			reason = "Error: void read_into_vector(std::string &filename, std::vector<double> &data)\n"; 
-//			reason += "Cannot open: " + filename + "\n"; 
-//			throw std::invalid_argument(reason); 
-//		}
-//		
-//	}
-//	catch(std::invalid_argument &e){
-//		useful_funcs::exit_failure_output(e.what());
-//		exit(EXIT_FAILURE); 
-//	}
-//}
+void sweep::set_vals(sweep &swp_obj)
+{
+	// Assign the values from one swp_obj to another
 
-//double useful_funcs::test_func(double (*f)(int, int), int a, int b)
-//{
-//	return (*f)(a, b); 
-//}
+	try {
+		if (swp_obj.defined()) {
+			*this = swp_obj; 
+		}
+		else {
+			std::string reason;
+			reason = "Error: void sweep::void set_vals(sweep &swp_obj)\n";
+			reason += "Parameters not defined for input object\n"; 
+
+			throw std::invalid_argument(reason);
+		}
+	}
+	catch (std::invalid_argument &e) {
+		useful_funcs::exit_failure_output(e.what());
+		exit(EXIT_FAILURE);
+	}
+}
+
+double sweep::get_val(int i)
+{
+	// Access the computed sweep parameters stored in the array
+
+	try {
+		bool c1 = i > -1 ? true : false; 
+		bool c2 = i < Nsteps ? true : false; 
+		bool c3 = static_cast<int>(values.size()) == Nsteps ? true : false; 
+		bool c4 = static_cast<int>(values.size()) > 3 ? true : false; 
+		bool c10 = c1 && c2 && c3 && c4;
+
+		if (c10) {
+			return values[i]; 
+		}
+		else {
+			return 0.0; 
+			std::string reason; 
+			reason = "Error: double sweep::get_val(int i)\n"; 
+			if (!c1 || !c2) reason += "Out of bounds array access attempt\n"; 
+			if (!c3 || !c4) reason += "values not correctly defined\n"; 
+			throw std::invalid_argument(reason); 
+		}
+	}
+	catch (std::invalid_argument &e) {
+		useful_funcs::exit_failure_output(e.what());
+		exit(EXIT_FAILURE);
+	}
+}
+
+std::vector<double> sweep::get_vals()
+{
+	// return the computed sweep parameters
+	// R. Sheehan 8 - 5 - 2019
+
+	try {
+		if (params_defined) {
+			return values; 
+		}
+		else {
+			return std::vector<double>();
+			std::string reason;
+			reason = "Error: std::vector<double> sweep::get_vals()\n";
+			reason += "Values not defined\n"; 
+			throw std::invalid_argument(reason);
+		}
+	}
+	catch (std::invalid_argument &e) {
+		useful_funcs::exit_failure_output(e.what());
+		exit(EXIT_FAILURE);
+	}
+}
