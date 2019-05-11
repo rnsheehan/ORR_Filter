@@ -57,7 +57,8 @@ void ORR::set_params(double wavelength, double eff_indx, double group_indx, doub
 			rho = BL; 
 			R = ring_rad; 
 			Lcoup = ring_coup_len;
-			L = 2.0*(Lcoup + PI * R); 
+			//L = 2.0*(Lcoup + PI * R); 
+			L = 20000 * (wavelength / neff); 
 
 			eff_OPL = neff * L; // optical path length based on effective index 
 			grp_OPL = ng * L; // optical path length based on group index
@@ -128,7 +129,7 @@ void ORR::report()
 			std::cout << "Total ring length: " << L << " um\n"; 
 			std::cout << "Effective optical path length: " << eff_OPL << " um\n"; 
 			std::cout << "Group optical path length: " << grp_OPL << " um\n";
-			std::cout << "kappa L: " << kappa * L << "\n\n"; 
+			std::cout << "kappa L: " << kappa * Lcoup << "\n\n";
 
 			std::cout << "Attenuation term X: " << X << "\n"; 
 			std::cout << "Coupling term Y: " << Y << "\n\n";
@@ -163,7 +164,7 @@ double ORR::through_spctrm(double wavelength)
 		if (params_defined && wavelength > 0.0) {
 
 			double phase = (PI * eff_OPL) / wavelength; // actually \phi / 2 
-			double denom = XY_conj + 4.0 * XY * template_funcs::DSQR(phase); 
+			double denom = XY_conj + 4.0 * XY * template_funcs::DSQR(sin(phase)); 
 
 			if (abs(denom) > 0.0) {
 				double t1 = X_conj_Y_conj / denom; 

@@ -49,7 +49,7 @@ void testing::orr_values()
 	double gamma = 2.3E-7; 
 	double rho = gamma; 
 	double kappa = 1.31E-5; 
-	double Lcoup = 1000; 
+	double Lcoup = 20000; // units?
 	double bendR = 3000; 
 
 	ORR device; 
@@ -58,7 +58,7 @@ void testing::orr_values()
 
 	device.report(); 
 
-	double start = 0.5, end = 3.0, increment = 0.01; 
+	double start = 1.3, end = 1.7, increment = 0.001; 
 	std::string filename = "Spectrum_Scan_Values.txt"; 
 	device.spctrm_scan(start, end, increment, filename); 
 }
