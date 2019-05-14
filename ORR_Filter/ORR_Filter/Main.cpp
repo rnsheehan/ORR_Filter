@@ -10,7 +10,11 @@ int main()
 {
 	//testing::material_values(); 
 
-	//testing::orr_values(); 
+	//testing::disp_curve_wire(); 
+
+	//testing::disp_curve_rib(); 
+
+	testing::orr_values(); 	
 
 	std::cout << "Press enter to close\n"; 
 	std::cin.get(); 

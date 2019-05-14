@@ -7,7 +7,11 @@
 namespace testing {
 	void material_values();
 
-	//void orr_values(); 
+	void disp_curve_wire();
+
+	void disp_curve_rib();
+
+	void orr_values(); 
 }
 
 #endif

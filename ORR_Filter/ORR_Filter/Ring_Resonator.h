@@ -12,28 +12,26 @@
 class ORR {
 public:
 	ORR();
-	ORR(std::vector<double> &wl_vals, std::vector<double> &neff_vals, std::vector<double> &ngrp_vals);
+	ORR(double &min_size, double &notch_wavelength, double &eff_indx, double &grp_index, double &coup_coeff, double &IL, double &BL, double &ring_coup_len);
 	~ORR(); 
-
-	void set_params(std::vector<double> &wl_vals, std::vector<double> &neff_vals, std::vector<double> &ngrp_vals);
 	
-	void compute_coefficients(double &notch_wavelength, double &coup_coeff, double &IL, double &BL, double &ring_coup_len);
+	void compute_coefficients(double &min_size, double &notch_wavelength, double &eff_indx, double &grp_index, double &coup_coeff, double &IL, double &BL, double &ring_coup_len);
 
 	void report();
 
-	void spctrm_scan(std::string filename);
+	void spctrm_scan(double start, double end, double increment, std::string filename);
 
 private:
-	double through_spctrm(int i);
-
-	double drop_scptrm(int i);
+	double through_spctrm(double lambda);
+	double drop_scptrm(double lambda); 
 
 private:
 	bool inputs_defined; // switch that decides if inputs have been input correctly
 	bool params_defined; // switch that decides if parameters have been computed correctly
 
-	int n_wl; // no. wavelengths in input spectrum
+	int res_order; // order of ring resonator structure, m = ceil((neff/lambda)*min_length)
 
+	double min_length; // PI * minimum feature size, units of um
 	double notch_lambda; // resonance wavelength
 	double notch_neff; // effective index at resonance wavelength
 	double notch_ngrp; // group index at resonance wavelength
@@ -61,15 +59,11 @@ private:
 	double Tmax; // max value of transmission spectrum
 	double Tmin; // min value of transmission spectrum
 	double F; // ORR finesse
-	double FWHM; // resonance peak FWHM in phase space
+	double phi_FWHM; // resonance peak FWHM in phase space
 	double nu_FWHM; // resonance peak FWHM in frequency space
 	double wl_FWHM; // resonance peak FWHM in wavelength space
 	double nu_FSR; // frequency free spectral range
 	double wl_FSR; // wavelength free spectral range
-
-	std::vector<double> wavelengths; // must be in units of um
-	std::vector<double> effective_index; 
-	std::vector<double> group_index; 
 };
 
 #endif
