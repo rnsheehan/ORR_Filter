@@ -66,7 +66,7 @@ void ORR::compute_coefficients(double &min_size, double &notch_wavelength, doubl
 
 			rho = BL; // bend loss, units of dB / um
 			Lcoup = ring_coup_len; // coupling length (?) units of um
-			L = 50 * res_order * (notch_lambda / notch_neff); // need to optimise how the value of m is chosen
+			L = 150 * res_order * (notch_lambda / notch_neff); // need to optimise how the value of m is chosen
 			R = L / Two_PI; // ring radius value 
 
 			eff_OPL = notch_neff * L; // optical path length based on effective index 

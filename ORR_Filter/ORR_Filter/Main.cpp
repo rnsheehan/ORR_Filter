@@ -14,7 +14,9 @@ int main()
 
 	//testing::disp_curve_rib(); 
 
-	testing::orr_values(); 	
+	//testing::orr_values(); 	
+
+	testing::orr_design_wire(); 
 
 	std::cout << "Press enter to close\n"; 
 	std::cin.get(); 

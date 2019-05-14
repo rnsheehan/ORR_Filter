@@ -122,6 +122,7 @@ protected:
 	bool pol; // polarisation
 	bool not_pol; // !polarisation
 	bool params_defined; 
+	bool wg_reduced; // has the first step of the calculation been performed? 
 
 	// Waveguide Dimensions
 	double width; // W rib / ridge width in units of um

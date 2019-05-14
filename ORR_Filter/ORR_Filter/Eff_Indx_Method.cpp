@@ -241,7 +241,7 @@ void ri_vals::set_ridge(double Ncore, double Nsub, double Nrib, double Nclad, do
 EIM::EIM()
 {
 	// Default Constructor
-	params_defined = false; 
+	params_defined = wg_reduced = false;
 	width = height = etch_depth = slab_height = core_height = 0.0; 
 	ncore = nsub = nrib = nclad = lambda = 0.0; 
 }
@@ -252,7 +252,7 @@ EIM::~EIM()
 
 	eta_one.clear(); 
 	eta_two.clear(); 
-	params_defined = false;
+	params_defined = wg_reduced = false;
 }
 
 void EIM::get_index(bool loud)
@@ -261,29 +261,37 @@ void EIM::get_index(bool loud)
 	// same calculation scheme will be used by all derived classes
 	// R. Sheehan 31 - 5 - 2010
 	try {
-		bool c1 = dimensions.get_W() > 0.0 ? true : false; 
-		bool c2 = eta_one.size() > 0 ? true : false; 
-		bool c3 = eta_two.size() > 0 ? true : false;
-		bool c4 = eta_two[0] > eta_one[0] ? true : false;
-		bool c5 = ref_indx.get_WL() > 0.0 ? true : false;
-		bool c10 = c1 && c2 && c3 && c5; 
+		if (wg_reduced) {
+			bool c1 = dimensions.get_W() > 0.0 ? true : false;
+			bool c2 = eta_one.size() > 0 ? true : false;
+			bool c3 = eta_two.size() > 0 ? true : false;
+			bool c4 = eta_two[0] > eta_one[0] ? true : false;
+			bool c5 = ref_indx.get_WL() > 0.0 ? true : false;
+			bool c10 = c1 && c2 && c3 && c5;
 
-		if (c10) {
-			TLS.set_params(dimensions.get_W(), ref_indx.get_WL(), eta_two[0], eta_one[0], eta_one[0]);
+			if (c10) {
+				TLS.set_params(dimensions.get_W(), ref_indx.get_WL(), eta_two[0], eta_one[0], eta_one[0]);
 
-			TLS.neff_search(not_pol); 
+				TLS.neff_search(not_pol);
 
-			if(loud) TLS.report(not_pol);
+				if (loud) TLS.report(not_pol);
+			}
+			else {
+				std::string reason;
+				reason = "Error: void EIM::get_index()\n";
+				if (!c1) reason += "width: " + template_funcs::toString(dimensions.get_W(), 2) + " is not correct\n";
+				if (!c2) reason += "eta_one.size(): " + template_funcs::toString(eta_one.size(), 2) + " is not correct\n";
+				if (!c3) reason += "eta_one.two(): " + template_funcs::toString(eta_two.size(), 2) + " is not correct\n";
+				if (!c4) reason += "eta_two[0]: " + template_funcs::toString(eta_two[0], 2) + " <= eta_one[0]: " + template_funcs::toString(eta_one[0], 2) + " is not correct";
+				if (!c5) reason += "lambda: " + template_funcs::toString(ref_indx.get_WL(), 2) + " is not correct\n";
+
+				throw std::invalid_argument(reason);
+			}
 		}
 		else {
 			std::string reason;
 			reason = "Error: void EIM::get_index()\n";
-			if (!c1) reason += "width: " + template_funcs::toString(dimensions.get_W(), 2) + " is not correct\n";
-			if (!c2) reason += "eta_one.size(): " + template_funcs::toString(eta_one.size(), 2) + " is not correct\n";
-			if (!c3) reason += "eta_one.two(): " + template_funcs::toString(eta_two.size(), 2) + " is not correct\n";
-			if (!c4) reason += "eta_two[0]: " + template_funcs::toString(eta_two[0], 2) + " <= eta_one[0]: " + template_funcs::toString(eta_one[0], 2) + " is not correct";
-			if (!c5) reason += "lambda: " + template_funcs::toString(ref_indx.get_WL(), 2) + " is not correct\n";
-			
+			reason += "Calculation cannot proceed as first step has not been performed\n"; 
 			throw std::invalid_argument(reason);
 		}
 	}
@@ -486,6 +494,8 @@ void Rectangular::reduce_wg()
 					eta_one.push_back(ref_indx.get_Nclad());
 					eta_two.push_back(TLS.get_neff(i, pol)); // store the reduced effective indices
 				}
+
+				wg_reduced = true; 
 			}
 			else {
 				// No modes through the vertical section means the device is basically a TLS anyway
@@ -659,6 +669,8 @@ void Wire::reduce_wg()
 				reason += "No modes computed in central vertical cross section\n";
 				throw std::runtime_error(reason);
 			}
+
+			wg_reduced = true;
 		}
 		else {
 			std::string reason;
@@ -843,6 +855,8 @@ void Rib::reduce_wg()
 				reason += "No modes computed in central vertical cross section\n";
 				throw std::runtime_error(reason);
 			}
+
+			wg_reduced = true;
 		}
 		else {
 			std::string reason;
@@ -1034,6 +1048,8 @@ void Shallow_Ridge::reduce_wg()
 				reason += "No modes computed in central vertical cross section\n";
 				throw std::runtime_error(reason);
 			}
+
+			wg_reduced = true;
 		}
 		else {
 			std::string reason;

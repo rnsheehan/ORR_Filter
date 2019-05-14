@@ -12,6 +12,8 @@ namespace testing {
 	void disp_curve_rib();
 
 	void orr_values(); 
+
+	void orr_design_wire(); 
 }
 
 #endif

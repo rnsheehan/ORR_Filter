@@ -1,6 +1,7 @@
 Program Exit Explanation
 
-Error occurred: Tue May 14 15:19:17 2019
+Error occurred: Tue May 14 20:13:34 2019
 
-Error: void ORR::report()
+Error: void ORR::compute_coefficients(double &notch_wavelength, double &coup_coeff, double &IL, double &BL, double &ring_coup_len)
+coup_coeff: 1.45 is not correct
 
