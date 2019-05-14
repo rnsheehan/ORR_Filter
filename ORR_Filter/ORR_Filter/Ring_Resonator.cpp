@@ -24,20 +24,17 @@ ORR::ORR(std::vector<double> &wl_vals, std::vector<double> &neff_vals, std::vect
 ORR::~ORR()
 {
 	inputs_defined = params_defined = false;
+
+	wavelengths.clear(); effective_index.clear(); group_index.clear(); 
 }
 
 void ORR::set_params(std::vector<double> &wl_vals, std::vector<double> &neff_vals, std::vector<double> &ngrp_vals)
 {
-	// assign parameters to the members of the ORR class
-	// wavelength is the reference wavelength for the calculation
-	// eff_indx is the waveguide effective index, not sure if it needs to be wavelength dependent yet
-	// group indx is the waveguide group effective index, it definitely depends on wavelength
-	// coup_coeff is the waveguide to ring coupling coefficient
-	// IL is the waveguide insertion loss
-	// BL is the ring bend loss
-	// ring_rad is the ring bend radius
-	// ring_coup_len is the length of the ring coupling section
-	// R. Sheehan 18 - 2 - 2019
+	// Assign dispersion data to the class
+	// wl_vals is the wavelength spectrum
+	// neff_vals is the wavelength dependent effective index data
+	// ngrp_vals is the wavelength dependent group index data
+	// R. Sheehan 13 - 5 - 2019
 	
 	try {
 		n_wl = static_cast<int>(wl_vals.size()); 
@@ -50,6 +47,11 @@ void ORR::set_params(std::vector<double> &wl_vals, std::vector<double> &neff_val
 		if (c10) {
 			// Define member values
 			
+			wavelengths = wl_vals; 
+
+			effective_index = neff_vals; 
+
+			group_index = ngrp_vals; 
 
 			inputs_defined = true; 
 		}
@@ -70,8 +72,15 @@ void ORR::set_params(std::vector<double> &wl_vals, std::vector<double> &neff_val
 
 void ORR::compute_coefficients(double &notch_wavelength, double &coup_coeff, double &IL, double &BL, double &ring_coup_len)
 {
-	try {	
-		
+	// assign parameters to the members of the ORR class, these should be updated anytime the parameters change
+	// notch_wavelength is the reference wavelength for the calculation
+	// coup_coeff is the waveguide to ring coupling coefficient
+	// IL is the waveguide insertion loss
+	// BL is the ring bend loss
+	// ring_coup_len is the length of the ring coupling section (I have some queries about this parameter)
+	// R. Sheehan 13 - 5 - 2019
+
+	try {			
 		bool c2 = coup_coeff > 0.0 && coup_coeff < 1.0 ? true : false;
 		bool c3 = IL > 0.0 ? true : false;
 		bool c4 = BL > 0.0 ? true : false;
@@ -86,10 +95,10 @@ void ORR::compute_coefficients(double &notch_wavelength, double &coup_coeff, dou
 			notch_lambda = notch_wavelength;
 			
 			double delta; 
+
 			interpolation::polint(wavelengths, effective_index, notch_lambda, notch_neff, delta);
 
-			interpolation::polint(wavelengths, group_index, notch_lambda, notch_ngrp, delta);
-			
+			interpolation::polint(wavelengths, group_index, notch_lambda, notch_ngrp, delta);			
 			
 			kappa = coup_coeff;
 			gamma = IL;
@@ -99,7 +108,7 @@ void ORR::compute_coefficients(double &notch_wavelength, double &coup_coeff, dou
 			//R = ring_rad;
 			Lcoup = ring_coup_len;
 			//L = 2.0*(Lcoup + PI * R); 
-			L = 20000 * (notch_lambda / notch_neff);
+			L = 20000 * (notch_lambda / notch_neff); // need to optimise how the value of m is chosen
 
 			eff_OPL = notch_neff * L; // optical path length based on effective index 
 			grp_OPL = notch_ngrp * L; // optical path length based on group index
@@ -153,9 +162,9 @@ void ORR::report()
 	try {
 		if (params_defined) {
 			std::cout << "Optical Ring Resonator Parameters\n\n";
-			std::cout << "Reference wavelength: " << lambda << " um\n"; 
-			std::cout << "Waveguide effective index: " << neff << "\n"; 
-			std::cout << "Waveguide group index: " << ng << "\n\n"; 
+			std::cout << "Reference wavelength: " << notch_lambda << " um\n";
+			std::cout << "Waveguide effective index: " << notch_neff << "\n";
+			std::cout << "Waveguide group index: " << notch_ngrp << "\n\n";
 			
 			std::cout << "Insertion loss: "<<gamma<<" dB / um\n";
 			std::cout << "Bend loss: " << rho << " dB / um\n";
@@ -210,14 +219,14 @@ double ORR::through_spctrm(int i)
 			else {
 				return 0.0; 
 				std::string reason;
-				reason = "Error: double ORR::through_spctrm(double wavelength)\n";
+				reason = "Error: double ORR::through_spctrm(int i)\n";
 				reason += "Attempt to divide by zero\n";
 				throw std::runtime_error(reason);
 			}
 		}
 		else {
 			std::string reason; 
-			reason = "Error: double ORR::through_scptrm(double wavelength)\n"; 
+			reason = "Error: double ORR::through_scptrm(int i)\n"; 
 			reason += "Parameters not defined\n";
 			throw std::invalid_argument(reason); 
 		}
@@ -242,7 +251,7 @@ double ORR::drop_scptrm(int i)
 		else {
 			return 0.0; 
 			std::string reason;
-			reason = "Error: double ORR::drop_scptrm(double wavelength)\n";
+			reason = "Error: double ORR::drop_scptrm(int i)\n";
 			reason += "Parameters not defined\n";
 			throw std::invalid_argument(reason);
 		}
@@ -255,7 +264,7 @@ double ORR::drop_scptrm(int i)
 
 void ORR::spctrm_scan(std::string filename)
 {
-	// scan the spectrum from start to finish in steps of increment
+	// scan the wavelength spectrum to compute the through spectrum
 	// R. Sheehan 19 - 2 - 2019
 
 	try {
@@ -265,20 +274,14 @@ void ORR::spctrm_scan(std::string filename)
 			std::ofstream write(filename, std::ios_base::out, std::ios_base::trunc);
 
 			if ( write.is_open() ) {
-				int N_wl, count = 0;
-				double x = start, Tval;
-
-				N_wl = static_cast<int>(1 + ((end - start) / increment));
-
+				
 				// loop over wavelength values
-				for (int i = 0; i < N_wl; i++) {
+				for (int i = 0; i < n_wl; i++) {
 
-					Tval = through_spctrm(x); // compute transmission value
+					double Tval = through_spctrm(i); // compute transmission value
 
 					// write the data to a file
-					write << std::setprecision(10) << x << " , " << Tval << " , " << 1.0 - Tval << "\n"; 
-
-					x += increment;
+					write << std::setprecision(10) << wavelengths[i] << " , " << Tval << " , " << 1.0 - Tval << "\n"; 
 				}			
 			}
 			else {
@@ -291,9 +294,6 @@ void ORR::spctrm_scan(std::string filename)
 		else {
 			std::string reason;
 			reason = "Error: void ORR::spctrm_scan(double start, double end, double increment, std::string filename)\n";
-			if (!c1) reason += "start: " + template_funcs::toString(start, 2) + " is not correct\n";
-			if (!c2) reason += "end: " + template_funcs::toString(end, 2) + " is not correct\n";
-			if (!c3 || !c4) reason += "increment: " + template_funcs::toString(increment, 2) + " is not correct\n";
 			throw std::invalid_argument(reason);
 		}
 	}
