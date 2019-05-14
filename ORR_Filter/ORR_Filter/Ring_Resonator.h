@@ -12,7 +12,7 @@
 class ORR {
 public:
 	ORR();
-	ORR(std::vector<double> &wavelengths, std::vector<double> &eff_indx, std::vector<double> &group_indx);
+	ORR(std::vector<double> &wl_vals, std::vector<double> &neff_vals, std::vector<double> &ngrp_vals);
 	~ORR(); 
 
 	void set_params(std::vector<double> &wl_vals, std::vector<double> &neff_vals, std::vector<double> &ngrp_vals);
