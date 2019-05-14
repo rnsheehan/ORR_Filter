@@ -10,7 +10,7 @@ int main()
 {
 	//testing::material_values(); 
 
-	testing::orr_values(); 
+	//testing::orr_values(); 
 
 	std::cout << "Press enter to close\n"; 
 	std::cin.get(); 

@@ -164,7 +164,7 @@ double ORR::through_spctrm(double wavelength)
 		if (params_defined && wavelength > 0.0) {
 
 			double phase = (PI * eff_OPL) / wavelength; // actually \phi / 2 
-			double denom = XY_conj + 4.0 * XY * template_funcs::DSQR(sin(phase)); 
+			double denom = XY_conj + 4.0 * XY * template_funcs::DSQR( sin(phase) ); 
 
 			if (abs(denom) > 0.0) {
 				double t1 = X_conj_Y_conj / denom; 
