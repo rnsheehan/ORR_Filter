@@ -160,7 +160,7 @@ void testing::orr_design_wire()
 	int n_pts;
 	double start, stop, end, increment, W, H, separ, delta;
 	double min_feature = 0.2; // minimum feature size possible with lithography
-	double notch_wl = 1.55; // desired resonant wavelength, units of um
+	double notch_wl = 1.5; // desired resonant wavelength, units of um
 	double notch_neff, notch_ngrp; 
 	double gamma = 2.3E-7; // insertion loss, dB / um
 	double rho = gamma; // bend loss, dB / um
@@ -201,7 +201,7 @@ void testing::orr_design_wire()
 	wire_coupling.get_index(true); 
 
 	separ = min_feature; 
-	for (int i = 0; i < 10; i++) {
+	for (int i = 0; i < 50; i++) {
 		double cc = wire_coupling.coupling_coefficient(separ); 
 		
 		//std::cout << separ << " , " << cc << "\n";
@@ -236,13 +236,24 @@ void testing::orr_design_wire()
 	interpolation::polint(wavelengths, ngroup, notch_wl, notch_ngrp, delta);
 
 	// estimate the coupling coefficient based on waveguide separation
-	separ = 0.5; // units of um
-	//interpolation::polint(separation_vals, coupling_vals, separ, kappa, delta); 
+	separ = 0.3; // units of um
+	double kappa_alt = kappa, l_alt; 
+	interpolation::polint(separation_vals, coupling_vals, separ, kappa, delta);
+
+	l_alt = 20000; // this assumes units of cm? 
+	std::cout << "kappa estimation\n"; 
+	std::cout << "kappa: " << kappa << ", kappa_alt: " << kappa_alt << "\n"; 
+	std::cout << "kappa L: " << kappa*l_alt << ", kappa_alt L: " << kappa_alt*l_alt << "\n";
+	std::cout << "cos(kappa L): " << cos(kappa*l_alt) << ", cos(kappa_alt L): " << cos(kappa_alt*l_alt) << "\n\n";
 
 	// what's up with the weird scaling for kappa?
 	//kappa = log10(kappa); 
 
 	ORR device;
+
+	//Lcoup = PI / (2.0*kappa); 
+
+	Lcoup = 20e+3; // units of um!!
 
 	device.compute_coefficients(min_feature, notch_wl, notch_neff, notch_ngrp, kappa, gamma, rho, Lcoup);
 

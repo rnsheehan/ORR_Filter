@@ -42,7 +42,7 @@ void ORR::compute_coefficients(double &min_size, double &notch_wavelength, doubl
 		bool c5 = notch_wavelength > 0.0 ? true : false;
 		bool c7 = eff_indx > 1.0 ? true : false; 
 		bool c9 = grp_index > 1.0 ? true : false;
-		bool c2 = coup_coeff > 0.0 && coup_coeff < 1.0 ? true : false;
+		bool c2 = coup_coeff > 0.0 ? true : false;
 		bool c3 = IL > 0.0 ? true : false;
 		bool c4 = BL > 0.0 ? true : false;		
 		bool c6 = ring_coup_len > 0.0 ? true : false;		
@@ -66,7 +66,13 @@ void ORR::compute_coefficients(double &min_size, double &notch_wavelength, doubl
 
 			rho = BL; // bend loss, units of dB / um
 			Lcoup = ring_coup_len; // coupling length (?) units of um
-			L = 150 * res_order * (notch_lambda / notch_neff); // need to optimise how the value of m is chosen
+			// can change the reflectivity by changing the grating order
+			// worth investigating the relationship between order and length and reflectivity
+			// also the number of resonances changes with the length of the ring
+			// this should be related to the FSR, but it seems to bear no relation to the theoretical FSR
+			//L = 15 * res_order * (notch_lambda / notch_neff); // need to optimise how the value of m is chosen
+			L = 20000 * (notch_lambda / notch_neff); // need to optimise how the value of m is chosen
+			//Lcoup = L; 
 			R = L / Two_PI; // ring radius value 
 
 			eff_OPL = notch_neff * L; // optical path length based on effective index 
@@ -76,7 +82,7 @@ void ORR::compute_coefficients(double &min_size, double &notch_wavelength, doubl
 			wl_FSR = template_funcs::DSQR(notch_lambda) / grp_OPL; // wavelength FSR units of um
 
 			X = sqrt(gamma_conj)*exp(-0.5*rho*L);
-			Y = cos(kappa*L);
+			Y = cos(kappa*Lcoup);
 			XY = X * Y;
 
 			X_conj = 1.0 - template_funcs::DSQR(X); // 1 - x^{2}
@@ -132,11 +138,11 @@ void ORR::report()
 			std::cout << "Coupling coefficient: " << kappa << " dB/um\n\n"; 
 
 			std::cout << "Ring radius: " << R << " um\n";
-			std::cout << "Coupler length: " << L << " um\n";
+			std::cout << "Coupler length: " << Lcoup << " um\n";
 			std::cout << "Total ring length: " << L << " um\n"; 
 			std::cout << "Effective optical path length: " << eff_OPL / 1000.0 << " mm\n";
 			std::cout << "Group optical path length: " << grp_OPL / 1000.0 << " mm\n";
-			std::cout << "kappa L: " << kappa * L << "\n\n";
+			std::cout << "kappa Lcoup: " << kappa * Lcoup << "\n\n";
 
 			std::cout << "Attenuation term X: " << X << "\n"; 
 			std::cout << "Coupling term Y: " << Y << "\n\n";

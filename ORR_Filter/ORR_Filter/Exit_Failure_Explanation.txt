@@ -1,7 +1,7 @@
 Program Exit Explanation
 
-Error occurred: Tue May 14 20:13:34 2019
+Error occurred: Tue May 14 20:30:12 2019
 
-Error: void ORR::compute_coefficients(double &notch_wavelength, double &coup_coeff, double &IL, double &BL, double &ring_coup_len)
-coup_coeff: 1.45 is not correct
+Error: void interpolation::polint(std::vector<double> &xa, std::vector<double> &ya, double x, double &y, double &dy)
+Position: 10.000 is not in the data range
 
