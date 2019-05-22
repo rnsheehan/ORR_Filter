@@ -71,7 +71,7 @@ void ORR::compute_coefficients(double &min_size, double &notch_wavelength, doubl
 			// also the number of resonances changes with the length of the ring
 			// this should be related to the FSR, but it seems to bear no relation to the theoretical FSR
 			//L = 15 * res_order * (notch_lambda / notch_neff); // need to optimise how the value of m is chosen
-			L = 20000 * (notch_lambda / notch_neff); // need to optimise how the value of m is chosen
+			L = 15000 * (notch_lambda / notch_neff); // need to optimise how the value of m is chosen
 			//Lcoup = L; 
 			R = L / Two_PI; // ring radius value 
 
@@ -130,6 +130,7 @@ void ORR::report()
 			std::cout << "Reference wavelength: " << notch_lambda << " um\n";
 			std::cout << "Waveguide effective index: " << notch_neff << "\n";
 			std::cout << "Waveguide group index: " << notch_ngrp << "\n";
+			std::cout << "lambda / n_{eff}: "<< notch_lambda / notch_neff<<" um\n"; 
 			std::cout << "Minimum Size: " << min_length << " um\n"; 
 			std::cout << "Resonator Order: " << res_order << "\n\n";
 			
@@ -137,9 +138,9 @@ void ORR::report()
 			std::cout << "Bend loss: " << rho << " dB / um\n";
 			std::cout << "Coupling coefficient: " << kappa << " dB/um\n\n"; 
 
-			std::cout << "Ring radius: " << R << " um\n";
-			std::cout << "Coupler length: " << Lcoup << " um\n";
-			std::cout << "Total ring length: " << L << " um\n"; 
+			std::cout << "Ring radius: " << R/1000.0 << " mm\n";
+			std::cout << "Coupler length: " << Lcoup / 1000.0 << " mm\n";
+			std::cout << "Total ring length: " << L / 1000.0 << " mm\n"; 
 			std::cout << "Effective optical path length: " << eff_OPL / 1000.0 << " mm\n";
 			std::cout << "Group optical path length: " << grp_OPL / 1000.0 << " mm\n";
 			std::cout << "kappa Lcoup: " << kappa * Lcoup << "\n\n";

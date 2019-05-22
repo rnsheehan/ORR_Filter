@@ -249,6 +249,11 @@ void testing::orr_design_wire()
 	// what's up with the weird scaling for kappa?
 	//kappa = log10(kappa); 
 
+	// Need to figure out the relation ship between L, Lcoup and kappa to ensure accurate design
+	// Check out the following papers
+	// ``All-single-modefiber resonator'', Stokes et al and ``Silicon microring resonators'', Bogaerts et al. 
+	// R. Sheehan 22 - 5 - 2019
+
 	ORR device;
 
 	//Lcoup = PI / (2.0*kappa); 
